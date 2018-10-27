@@ -1,27 +1,6 @@
 import csv
-
-class Record:
-    def __init__(self, data, avgPM25, city):
-        self.year = int(data[1])
-        self.month = int(data[2])
-        self.day = int(data[3])
-        self.hour = int(data[4])
-        self.season = int(data[5])
-        self.iprec = float(data[-1])
-        self.rain = float(data[-2])
-        self.iws = float(data[-3])        
-        self.temp = float(data[-5])
-        self.pres = float(data[-6])
-        self.hwmi = float(data[-7])
-        self.dewp = float(data[-8])
-        self.city = city
-        self.avgPM25 = avgPM25
-        self.cbwd = 0 if data[-4] == "NE" else 1 if data[-4] == "NW" else 2 if data[-4] == "SE" else 3 if data[-4] == "SW" else 4
-        # NE: 0; NW: 1; SE: 2; SW: 3; ca: 4
-    
-    def getRow(self):
-        return [self.year, self.month, self.day, self.hour, self.season, self.dewp, self.hwmi, 
-        self.pres, self.temp, self.cbwd, self.iws, self.rain, self.iprec, self.city, self.avgPM25]
+import numpy as np
+from sklearn import preprocessing
 
 def loadCSV(filename, city):
     print("======== Load CSV File ========")
@@ -38,26 +17,45 @@ def loadCSV(filename, city):
                         totalPM25 = 0                    
                     stations += 1
                     totalPM25 += int(pm25)
-            if stations != 0 and "NA" not in row[:6] and "NA" not in row[-9:]:
-                records.append(Record(row, totalPM25 / stations, city))
-    
+            if stations != 0 and "NA" not in row[:6] and "NA" not in row[-9:] and row[-8] != "-9999" and row[-7] != "-9999":
+                row[-4] = 0 if row[-4] == "NE" else 1 if row[-4] == "NW" else 2 if row[-4] == "SE" else 3 if row[-4] == "SW" else 4
+                record = row[1:6] + row[-8:]
+                record.append(city)
+                record.append(totalPM25 / stations)
+                records.append(record)    
+    return list(map(list, zip(*records)))
+
+def normalizeData(records):
+    records[:5] = np.array(records[:5]).astype(int)
+    records[9] = np.array(records[9]).astype(int)
+    records[13] = np.array(records[13]).astype(int)
+    records[14] = np.array(records[14]).astype(float)
+    cols = [5, 6, 7, 8, 10, 11, 12]
+    for col in cols:
+        records[col] = preprocessing.minmax_scale(records[col], (0, 1), 0)
     return records
 
 def writeCSV(records):
+    transformedRecords = list(map(list, zip(*records)))
     with open('allPMData.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Year", "Month", "Day", "Hour", "Season", "DEWP", 
             "HWMI", "PRES", "TEMP", "CBWD", "IWS", "RAIN", "IPREC", "City", "AVG PM2.5"])
-        for record in records:
-            writer.writerow(record.getRow())
+        for record in transformedRecords:
+            writer.writerow(record)
+
+def concateAllData(allRecords, appendRecords):
+    for i in range(len(allRecords)):
+        allRecords[i].extend(appendRecords[i])
 
 if __name__ == "__main__":
     allRecords = []
     allRecords.extend(loadCSV('data/Beijing.csv', 0))   # Bejing: 0
-    allRecords.extend(loadCSV('data/Chengdu.csv', 1))   # Chengdu: 1
-    allRecords.extend(loadCSV('data/Guangzhou.csv', 2))   # Guangzhou: 2
-    allRecords.extend(loadCSV('data/Shanghai.csv', 3))   # Shanghai: 3
-    allRecords.extend(loadCSV('data/Shenyang.csv', 4))   # Shenyang: 4
+    concateAllData(allRecords, loadCSV('data/Chengdu.csv', 1))   # Chengdu: 1
+    concateAllData(allRecords, loadCSV('data/Guangzhou.csv', 2))   # Guangzhou: 2
+    concateAllData(allRecords, loadCSV('data/Shanghai.csv', 3))   # Shanghai: 3
+    concateAllData(allRecords, loadCSV('data/Shenyang.csv', 4))   # Shenyang: 4
     
+    allRecords = normalizeData(allRecords)
     writeCSV(allRecords)
     
