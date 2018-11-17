@@ -20,9 +20,10 @@ Attribute Information after Preprocessing:
 
 Data Preprocessing:  
 1. Remove records which don't have PM2.5 data from every oberservatory  
-2. Remove records which don't have data of any one of attributes  
-3. Calculate average PM2.5 from each overservatory with PM2.5 data  
-4. Transform CBWD and City to numerical data
-5. Normalize continuous fetaures between 0 to 1
+2. Remove records which don't have data of any of attributes
+3. Remove records which contain outlier values of any feature
+4. Calculate average PM2.5 from each overservatory with PM2.5 data  
+5. Transform CBWD and City to numerical data
+6. Normalize continuous fetaures between 0 to 1
 
 [PM2.5 Data](https://archive.ics.uci.edu/ml/datasets/PM2.5+Data+of+Five+Chinese+Cities)
