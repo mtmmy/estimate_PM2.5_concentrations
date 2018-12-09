@@ -40,7 +40,7 @@ def writeCSV(records):
     with open('allPMData.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Year", "Month", "Day", "Hour", "Season", "DEWP", 
-            "HWMI", "PRES", "TEMP", "CBWD", "IWS", "RAIN", "IPREC", "City", "AVG PM2.5"])
+            "HWMI", "PRES", "TEMP", "CBWD", "IWS", "RAIN", "IPREC", "City", "AVG_PM_2_5"])
         for record in transformedRecords:
             writer.writerow(record)
 

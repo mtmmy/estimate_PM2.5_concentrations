@@ -14,8 +14,9 @@ def loadCSV():
     return (np.array(records), np.array(results))
 
 records, results = loadCSV()
-pca = PCA(n_components=1)
+pca = PCA(n_components=3)
 newRecords = pca.fit_transform(records)
 newData = np.append(newRecords, results, axis=1)
-print(pca.explained_variance_ratio_)
-print(pca.singular_values_)
+# print(pca.explained_variance_ratio_)
+# print(pca.singular_values_)
+# print(sum(pca.explained_variance_ratio_))
